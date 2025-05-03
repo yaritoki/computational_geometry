@@ -76,7 +76,19 @@ def plot_line(line: Line, color=None, label=None, zorder=0):
 
     # Определяем уравнение прямой A * x + B * y + C = 0
     x, y = symbols('x y')
-    A, B, C = line.equation().as_coefficients_dict().values()
+    # Получаем коэффициенты уравнения прямой (Ax + By + C = 0)
+    coeffs = line.equation().as_coefficients_dict()
+    A, B, C = 0, 0, 0
+    for key in coeffs.keys():
+        if key == 1:
+            C = coeffs.get(key)
+            continue
+        if key.name == y.name:
+            B = coeffs.get(key)
+            continue
+        if key.name == x.name:
+            A = coeffs.get(key)
+
     eq_line = A * x + B * y + C
     solution = solve(eq_line, y)[0]
 
