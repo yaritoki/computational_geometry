@@ -1,18 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sympy import symbols, solve
+from sympy import symbols, solve, N
 from sympy.geometry import Point, Segment, Line, Circle
 
 # Point
-def plot_point(point: Point, color=None, label=None, zorder=0, name=None, textcoords_name="offset points",
-               xytext_name=(10, 10), ha_name='left'):
+def plot_point(point: Point, color=None, label=None, zorder=0, name=None,
+               textcoords_name="offset points", xytext_name=(10, 10), ha_name='left'):
     """
     Параметры метода построения Точки класса Point на плоскости
     * point - объект класса sympy.geometry.Point (двухмерный)
     * color - цвет точки
     * label - подпись точки в легенде
-    * zorder - число, объекты с большим значением zorder отображаются поверх объектов с меньшим значением,
-    по умолчанию 0
+    * zorder - число, объекты с большим значением zorder отображаются поверх
+     объектов с меньшим значением, по умолчанию 0
     * name - подпись у объекта на плоскости
         # textcoords_name - смещение подписи относительно точки
         # xytext_name - смещение (по x и y)
@@ -23,6 +23,7 @@ def plot_point(point: Point, color=None, label=None, zorder=0, name=None, textco
 
     # Отображаем точку
     plt.scatter(x, y, color=color, label=label, zorder=zorder)
+    # Добавляем подпись
     if name is not None:
         plt.annotate(name,
                      (x, y),
@@ -32,25 +33,41 @@ def plot_point(point: Point, color=None, label=None, zorder=0, name=None, textco
 
 
 # Segment
-def plot_segment(segment: Segment, color=None, label=None,
-                 zorder=0, ends_is_show=False, color_ends=None):
+def plot_segment(segment: Segment, color=None, label=None, linestyle=None,
+                 zorder=0, ends_is_show=False, color_ends=None,
+                 name=None, textcoords_name="offset points",
+                 xytext_name=(10, 10), ha_name='left'
+                 ):
     """
     Параметры метода построения отрезка класса Segment на плоскости
     * segment - объект класса sympy.geometry.Segment (двухмерный)
     * color - цвет отрезка
     * label - подпись отрезка в легенде
+    * linestyle - стиль отрезка (например если '--' будет пунктир)
     * zoder - число, объекты с большим значением zorder отображаются
     поверх объектов с меньшим значением, по умолчанию 0
     * ends_is_show - bool переменная которая отвечат за то будут ли
     изображаться концы отрезков
     * color_ends - цвет концов отрезка (будет применяться если ends_is_show=True)
+    * name - подпись у объекта на плоскости
+        # textcoords_name - смещение подписи относительно точки
+        # xytext_name - смещение (по x и y)
+        # ha_name - горизонтальное выравнивание ('left', 'right', 'center')
     """
     # Получаем координаты концов отрезка
     x1, y1 = segment.p1.args
     x2, y2 = segment.p2.args
 
     # Отображаем отрезок
-    plt.plot([x1, x2], [y1, y2], color=color, label=label, zorder=zorder)
+    plt.plot([x1, x2], [y1, y2], color=color, label=label, linestyle=linestyle,
+             zorder=zorder)
+    if name is not None:
+      midpoint = segment.midpoint
+      plt.annotate(name,
+                     (midpoint.x, midpoint.y),
+                     textcoords=textcoords_name,
+                     xytext=xytext_name,
+                     ha=ha_name)
 
     if ends_is_show:
         # Отображаем концы отрезка
@@ -77,7 +94,7 @@ def plot_line(line: Line, color=None, label=None, zorder=0):
     # Определяем уравнение прямой A * x + B * y + C = 0
     x, y = symbols('x y')
     # Получаем коэффициенты уравнения прямой (Ax + By + C = 0)
-    coeffs = line.equation().as_coefficients_dict()
+    coeffs = N(line.equation()).as_coefficients_dict()
     A, B, C = 0, 0, 0
     for key in coeffs.keys():
         if key == 1:
@@ -127,6 +144,18 @@ def plot_circle(circle: Circle, color=None, label=None, zorder=0,
 # Polygon
 def plot_polygon(figure, color=None, label=None, is_fill=False,
                  zorder=0, vertices_is_show=False, vertices_color=None):
+    """
+      Параметры метода построения окружности класса Circle на плоскости
+      * figure - геометрическая фигура, может быть объект класса sympy.geometry.Polygon или его дочерные классы
+      * color - цвет фигуры
+      * label - подпись окружности в легенде
+      * is_fill - bool переменная которая отвечат за возможность залить внутреннюю область фигуры цветом
+      поверх объектов с меньшим значением, по умолчанию 0
+      * zoder - число, объекты с большим значением zorder отображаются
+      * vertices_is_show - bool переменная которая отвечат за то будут ли
+      изображаться вершины фигуры
+      * vertices_color - цвет вершин фигуры (будет применяться если ends_is_show=True)
+      """
     # Разделяем координаты вершин
     x, y = zip(*figure.vertices)
     x = list(x) + [x[0]]
