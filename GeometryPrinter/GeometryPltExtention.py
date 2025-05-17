@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.spatial import ConvexHull
 from sympy import symbols, solve, N
 from sympy.geometry import Point, Segment, Line, Circle
 
@@ -169,3 +170,49 @@ def plot_polygon(figure, color=None, label=None, is_fill=False,
     if vertices_is_show:
         marker = 'o'
     plt.plot(x, y, marker=marker, label=label, color=color, zorder=zorder)
+
+
+def plot_ConvexHull(hull: ConvexHull, color='g',
+                    is_show_points=False, color_points='b',
+                    is_show_vertices=False, color_vertices='r',
+                    is_fill=False, color_fill='lightblue', alpha_fill=0.4 ):
+  """
+          Параметры метода построения окружности класса Circle на плоскости
+          * hull - выпуклая оболочка класса scipy.spatial.ConvexHull
+          * color - цвет граней  выпуклой оболочки
+          * is_show_points - булевое поле отвечающее за добавление точек множества на график
+          * color_points - цвет точек множества
+          * is_show_vertices - булевое поле отвечающее за добавление вершин вупуклой оболочки на график
+          * color_points - цвет вершин вупуклой оболочки
+          * is_fill - булевое поле отвечающее за заливку области выпуклой оболочки на график
+          * color_fill - цвет заливки
+          * alpha_fill - цвет прозрачность цвета заливки
+  """
+  # Получим массив точек (множества над котором построили выпуклую оболочку)
+  points = hull.points
+
+  if is_show_points:
+    # Добавим точки множества
+    plt.scatter(points[:,0], points[:,1], color=color_points)
+
+
+  # Получим массив пар точек которые образуют грани выпуклой оболочки
+  # так называемые симплексы
+  simplices = hull.simplices
+
+  # Добавим на график грани выпуклой оболочк
+  for simplex in simplices:
+    plt.plot(points[simplex, 0], points[simplex, 1], color=color)
+
+  if is_fill:
+    # Заштриховать внутреннюю область оболочки
+    plt.fill(points[hull.vertices, 0], points[hull.vertices, 1],
+         color=color_fill, alpha=alpha_fill)
+
+  if is_show_vertices:
+    # Получим массив индексов точек которые образуют выпуклую оболочку
+    vertices_index = hull.vertices
+
+    # Добавим на график вершины выпуклой оболочки
+    for i in vertices_index:
+      plt.scatter(points[i][0], points[i][1], color=color_vertices)
